@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<project name="HW03_FirstDatabase" 
+		 basedir="../.." 
+		 default="run.SqlTool.gui">
+	
+	<property file="./src/ant/settings-mine.properties" />
+	<property file="./src/ant/settings.properties" />
+
+	<property name="common.dir" value="${basedir}/../JDBC-Common"/>
+	<property name="build-common.file" 
+		value="${common.dir}/src/ant/build-common.xml"/>
+	
+	<import file="${build-common.file}"/>
+</project>
