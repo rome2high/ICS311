@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+
+<!--
+  The normal processing goes through these files:
+	./s00-SomeApp/src/ant/build.xml
+	./s00-SomeApp/src/ant/settings-mine.properties   [optional]
+	./s00-SomeApp/src/ant/settings.properties   [optional]
+	./JDBC-Common/src/ant/build-common.xml
+	./JDBC-Common/src/ant/settings-common-mine.properties   [optional]
+	./JDBC-Common/src/ant/settings-common.properties
+ -->
+
+<project name="JDBC-CommonTargets" default="tomcat.deploy">
+	<dirname property="build-common.ant.dir"
+			 file="${ant.file.JDBC-CommonTargets}" />
+
+	<property file="${build-common.ant.dir}/settings-common-mine.properties" />
+	<property file="${build-common.ant.dir}/settings-common.properties" />
+
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.work.dir}" />
+		<mkdir dir="${resource.src.dir}" />
+	</target>
+
+	<target name="clean.all"
+			description="Remove all output files under build.dir" >
+
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="print.properties">
+		<echoproperties format="text" />
+	</target>
+
+	<target name="snapshot"
+			description="Creates a zip snapshot of 'src' directory">
+
+		<mkdir dir="${snapshot.dir}" />
+
+		<tstamp>
+			<format property="SNAP_TIME" pattern="yyyyMMdd_HHmmss" />
+		</tstamp>
+
+		<zip destfile="${snapshot.dir}/snap_${SNAP_TIME}.zip"
+			 basedir="${src.dir}/.."
+			 includes="src/**" />
+	</target>
+
+	<target name="copy.client.libs" depends="init" >
+		<echo>Using the do-nothing version of copy.client.libs
+			from build-common.xml.</echo>
+	</target>
+
+	<target name="copy.servlet.libs" depends="init" >
+		<echo>Using the do-nothing version of copy.servlet.libs
+			from build-common.xml.</echo>
+	</target>
+
+	<target name="make.client.jar" depends="init, copy.client.libs" >
+		<delete dir="${client.classes.dir}" />
+		<mkdir dir="${client.classes.dir}" />
+
+		<javac 	srcdir="${java.src.dir}"
+        	   	destdir="${client.classes.dir}"
+				includes="${java.client.source.includes}"
+				excludes="${java.client.source.excludes}"
+			   	fork="yes"
+                debug="on" debuglevel="source,lines"
+                source="${javac.source.version}"
+                target="${javac.target.version}"
+			>
+
+			<classpath>
+				<fileset file="${jnlp.jar}" />
+				<fileset dir="${client.lib.work.dir}" />
+			</classpath>
+		</javac>
+
+		<delete file="${client-app.jar}" />
+
+		<jar destfile="${client-app.jar}" >
+			<fileset dir="${client.classes.dir}" />
+			<fileset dir="${resource.src.dir}" />
+		</jar>
+	</target>
+
+	<target name="make.servlet.jar" depends="init, copy.servlet.libs" >
+		<delete dir="${servlet.classes.dir}" />
+		<mkdir dir="${servlet.classes.dir}" />
+
+		<javac 	srcdir="${java.src.dir}"
+        	   	destdir="${servlet.classes.dir}"
+				includes="${java.servlet.source.includes}"
+				excludes="${java.servlet.source.excludes}"
+			   	fork="yes"
+                debug="on" debuglevel="source,lines"
+                source="${javac.source.version}"
+                target="${javac.target.version}"
+			>
+
+			<classpath>
+				<fileset file="${servlet.api.jar}" />
+				<fileset file="${jsp.api.jar}" />
+				<fileset dir="${servlet.lib.work.dir}" />
+			</classpath>
+		</javac>
+
+		<delete file="${servlet-app.jar}" />
+		<jar destfile="${servlet-app.jar}" >
+			<fileset dir="${servlet.classes.dir}" />
+		</jar>
+	</target>
+
+	<target name="make.war"
+			description="Generate WAR file"
+		    depends="clean.all, make.client.jar, make.servlet.jar">
+
+		<mkdir dir="${web.extra.base.dir}" />
+		<mkdir dir="${web.extra.web-inf.dir}" />
+
+		<war destfile="${war.file}" webxml="${web.xml.file}" >
+			<webinf dir="${web.extra.web-inf.dir}" />
+			<lib file="${servlet-app.jar}" />
+			<lib dir="${servlet.lib.work.dir}" />
+			<lib file="${jnlp-servlet.jar}" />
+			<fileset dir="${web.extra.base.dir}" />
+			<zipfileset prefix="app/lib" dir="${client.lib.work.dir}" />
+			<zipfileset prefix="app/lib" file="${client-app.jar}" />
+		</war>
+	</target>
+
+	<target name="tomcat.deploy"
+            description="Rebuild and (re)deploy"
+		    depends="clean.all, make.war">
+
+        <TomcatUndeploy
+                url="${tomcat.manager.url}"
+			    username="${tomcat.manager.user}"
+			    password="${tomcat.manager.pass}"
+			    path="/${warfile.basename}"
+                failonerror="false" />
+
+        <TomcatDeploy
+                url="${tomcat.manager.url}"
+			    username="${tomcat.manager.user}"
+			    password="${tomcat.manager.pass}"
+			    path="/${warfile.basename}"
+			    war="${war.file}"
+                failonerror="true" />
+	</target>
+
+	<target name="tomcat.create.certificate"
+			description="Generate Certificate for Tomcat"
+			depends="init" >
+
+		<mkdir dir="${tomcat.ssl.keystore.dir}" />
+
+		<genkey alias="tomcat" storepass="secret" keyalg="RSA"
+				keystore="${tomcat.ssl.keystore.dir}/keys"
+				validity="366"
+				verbose="yes" >
+
+			<dname>
+				<param name="CN" value="ABC Corp" />
+				<param name="OU" value="SuperCoders"/>
+			    <param name="O"  value="Abc.org"/>
+			    <param name="C"  value="US"/>
+			</dname>
+		</genkey>
+
+		<!--
+		  To complete TLS/SSL support, ./conf/server.xml must have the
+		  connector for port 8443 uncommented and these two attributes
+		  appended to the end of the 'Connector port=8443' element:
+		      keystoreFile="/apps/tomcat/.keystore/keys" keystorePass="secret"
+		  Changing the filename as appropriate for your system and
+		  using a password of secret as hard-coded above in the storepass
+		  attribute of the genkey Ant task. In Linux, you made need to
+		  create the keystore directory manually and give the user that
+		  you're running Ant as permission to write the 'keys' file into
+		  that directory (and then the user that Tomcat is running under
+		  must be able to read the directory and 'keys' file).
+		-->
+	</target>
+
+	<target name="run.hsql.database" description="Run HSQL Database Engine"
+    		depends="init">
+
+		<java classname="com.programix.gui.GuiConsole" fork="yes" spawn="yes" >
+			<arg value="${hsql.server.classname}" />
+			<arg value="-port" />
+			<arg value="${hsql.server.port}" />
+			<arg value="-database" />
+			<arg value="${hsql.server.database.dir}/dbfile" />
+
+			<classpath>
+				<pathelement path="${hsql.jar}" />
+				<pathelement path="${ProgramixGenericLib.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="run.SqlTool.gui" description="Run SqlTool in interactive mode"
+    		depends="init">
+
+		<java classname="com.programix.gui.GuiConsole" fork="yes" spawn="yes" >
+			<arg value="SqlTool" />
+			<arg value="${jdbc.properties.file}" />
+
+			<classpath>
+				<pathelement path="${jdbc.driver.jar}" />
+				<pathelement path="${SqlTool.jar}" />
+				<pathelement path="${ProgramixGenericLib.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="run.SqlTool.batch" depends="init">
+		<java classname="com.programix.gui.GuiConsole" fork="yes" spawn="yes" >
+			<arg value="SqlTool" />
+			<arg value="${jdbc.properties.file}" />
+			<arg value="${sql.file.param}" />
+
+			<classpath>
+				<pathelement path="${jdbc.driver.jar}" />
+				<pathelement path="${SqlTool.jar}" />
+				<pathelement path="${ProgramixGenericLib.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+    <target name="setup.database.movie_simple"
+            description="Create or recreate movie_simple db">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${sql.common.dir}/movie_simple.sql" />
+        </antcall>
+    </target>
+
+    <target name="setup.database.movie_normal"
+            description="Create or recreate movie_normal db">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${sql.common.dir}/movie_normal.sql" />
+        </antcall>
+    </target>
+
+    <target name="setup.database.customer.address"
+            description="Create or recreate customer and address db">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${sql.common.dir}/customer_address.sql" />
+        </antcall>
+    </target>
+
+    <target name="setup.database.customer.shipping.address"
+            description="Create or recreate customer shipping address db">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${sql.common.dir}/customer_shipping_address.sql" />
+        </antcall>
+    </target>
+</project>
