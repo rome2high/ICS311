@@ -29,6 +29,7 @@ public final class Demo {
             CustomerDA cda = daSource.getDA(CustomerDA.class);
             
             Customer c1 = cda.getCustomer(2005);
+            System.out.println("Connect need to be fix");
             System.out.println("c1=" + c1);
             
             c1.setEmail("someone@somewhere.com");
