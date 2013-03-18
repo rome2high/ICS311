@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/resource"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/JDBC-Common/lib/hsqldb.jar"/>
+	<classpathentry kind="lib" path="/JDBC-Common/lib/ProgramixGenericLib/ProgramixGenericLib.jar" sourcepath="/JDBC-Common/lib/ProgramixGenericLib/ProgramixGenericLib-source.zip"/>
+	<classpathentry kind="output" path="build/eclipse/classes"/>
+</classpath>
