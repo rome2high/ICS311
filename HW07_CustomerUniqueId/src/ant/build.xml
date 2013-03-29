@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<project name="HW07_CustomerUniqueId" 
+		 basedir="../.." 
+		 default="run.SqlTool.gui">
+	
+	<property file="./src/ant/settings-mine.properties" />
+	<property file="./src/ant/settings.properties" />
+
+	<property name="common.dir" value="${basedir}/../JDBC-Common"/>
+	<property name="build-common.file" 
+		value="${common.dir}/src/ant/build-common.xml"/>
+	
+	<import file="${build-common.file}"/>
+	
+    <target name="setup.database.customer.uniqueid"
+            description="Create or recreate customer and unique id db">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${basedir}/src/sql/customer_uniqueid.sql" />
+        </antcall>
+    </target>
+</project>

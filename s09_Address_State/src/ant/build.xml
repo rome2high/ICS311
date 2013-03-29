@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<project name="s09_Address_State" 
+		 basedir="../.." 
+		 default="run.SqlTool.gui">
+	
+	<property file="./src/ant/settings-mine.properties" />
+	<property file="./src/ant/settings.properties" />
+
+	<property name="common.dir" value="${basedir}/../JDBC-Common"/>
+	<property name="build-common.file" 
+		value="${common.dir}/src/ant/build-common.xml"/>
+	
+	<import file="${build-common.file}"/>
+	
+    <target name="setup.database.address.state"
+            description="Create or recreate address and state example">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="src/sql/address_state.sql" />
+        </antcall>
+    </target>
+
+</project>
