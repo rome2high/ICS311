@@ -2,6 +2,8 @@ package com.abc.da.jdbc;
 
 import java.sql.*;
 
+import sun.jdbc.odbc.JdbcOdbc;
+
 import com.abc.da.*;
 import com.abc.dto.*;
 import com.programix.da2.exception.*;
@@ -85,14 +87,49 @@ public class CustomerDAJDBCImpl implements CustomerDA {
             throws NotFoundDAException, SQLException {
 
         PreparedStatement stmt = null;
+        Statement stmtLock = null;
+        
         try {
             if ( customer.getId() == null ) {
                 // new customer, generate a unique customer ID
                 
                 // FIXME - replace this exception with code to add a new
                 // customer to the database with a newly generated id
-                throw new SQLException("" +
-                		"adding new customers not YET supported");
+            	
+            	String tablename = "customer";
+            	
+            	String sqlLock = "UPDATE id_list " +
+            					 "SET last_id = last_id + 1 " +
+            					 "WHERE name = '" + tablename + "'";
+            	stmtLock = con.createStatement();
+            	stmtLock.executeUpdate(sqlLock);	//creates exclusive lock
+            	
+            	String sqlSelect = "SELECT last_id " +
+            					   "FROM id_list " +
+            					   "WHERE name = '" + tablename + "'";
+            	ResultSet rs = stmtLock.executeQuery(sqlSelect);
+            	
+            	if ( rs.next() == false ) {
+                    // trouble...throw exception
+            		throw new NotFoundDAException("Unable creating new id");
+                }
+                int id = rs.getInt(1); 
+                // complete transaction
+                String sql = 
+                        "INSERT INTO customer (id, lname, fname, email)" +
+                            " VALUES (?, ?, ?, ?);";
+                    stmt = con.prepareStatement(sql);
+                    stmt.setInt(1, id);
+                    stmt.setString(2, customer.getLastName());
+                    stmt.setString(3, customer.getFirstName());
+                    stmt.setString(4, customer.getEmail());
+                    
+                    int rowCount = stmt.executeUpdate();
+                    if ( rowCount == 0 ) {
+                        throw new NotFoundDAException("Insert Failed");
+                    }
+                return id;
+                
             } else {
                 // existing customer, update their information
                 int id = customer.getId();
@@ -112,6 +149,7 @@ public class CustomerDAJDBCImpl implements CustomerDA {
                 return id;
             }
         } finally {
+        	JDBCTools.closeQuietly(stmtLock);
             JDBCTools.closeQuietly(stmt);
         }
     }
