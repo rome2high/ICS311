@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="s99-SomeApp" 
+<project name="PROJ_Bank" 
 		 basedir="../.." 
 		 default="run.SqlTool.gui">
 	
@@ -12,4 +12,12 @@
 		value="${common.dir}/src/ant/build-common.xml"/>
 	
 	<import file="${build-common.file}"/>
+	
+    <target name="setup.database.bank.project"
+            description="Create or recreate the bank database">
+        <antcall target="run.SqlTool.batch">
+            <param name="sql.file.param"
+                   value="${basedir}/src/sql/bank_project.sql" />
+        </antcall>
+    </target>
 </project>
