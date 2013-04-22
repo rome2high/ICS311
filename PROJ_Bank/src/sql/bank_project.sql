@@ -1,5 +1,9 @@
 
-DROP TABLE owner;
+DROP INDEX state_index;
+DROP INDEX city_index;
+DROP INDEX custName_index;
+
+DROP TABLE customer_account;
 DROP TABLE account;
 DROP TABLE account_type;
 DROP TABLE customer;
@@ -10,7 +14,7 @@ DROP TABLE id_list;
 CREATE TABLE id_list (
     id INTEGER PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    last_id INTEGER NOT NULL,
+    lastID INTEGER NOT NULL,
     UNIQUE (name)
 );
 
@@ -23,47 +27,42 @@ CREATE TABLE state (
 
 CREATE TABLE address (
 	id INTEGER PRIMARY KEY,
-	street VARCHAR(30),
+	street VARCHAR(30) NOT NULL,
 	city VARCHAR(30),
-	state_ID INTEGER,
+	stateID INTEGER NOT NULL,
 	zip VARCHAR(5),
-	FOREIGN KEY (state_ID) REFERENCES state(id)
+	FOREIGN KEY (stateID) REFERENCES state(id)
 );
 
 CREATE TABLE customer (
 	id INTEGER PRIMARY KEY,
-	lname VARCHAR(30),
-	fname VARCHAR(25),
-	address_ID INTEGER,
-	FOREIGN KEY (address_ID) REFERENCES address(id)
+	lname VARCHAR(30) NOT NULL,
+	fname VARCHAR(30),
+	addressID INTEGER NOT NULL,
+	FOREIGN KEY (addressID) REFERENCES address(id)
 );
 
 CREATE TABLE account_type (
 	id INTEGER PRIMARY KEY,
-	code VARCHAR(3),
-	name VARCHAR(30)
+	code VARCHAR(3) NOT NULL,
+	name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE account (
 	id INTEGER PRIMARY KEY,
-	type_ID INTEGER,
-	balace INTEGER,
-	FOREIGN KEY (type_ID) REFERENCES account_type(id)
+	typeID INTEGER NOT NULL,
+	balance BIGINT NOT NULL,
+	FOREIGN KEY (typeID) REFERENCES account_type(id)
 );
 
-CREATE TABLE owner (
+CREATE TABLE customer_account (
 	id INTEGER PRIMARY KEY,
-	customer_ID INTEGER,
-	account_ID INTEGER,
-	FOREIGN KEY (customer_ID) REFERENCES customer (id),
-	FOREIGN KEY (account_ID) REFERENCES account (id)
+	customerID INTEGER NOT NULL,
+	accountID INTEGER,
+	FOREIGN KEY (customerID) REFERENCES customer (id),
+	FOREIGN KEY (accountID) REFERENCES account (id)
 );
 
-
-
-
-
-
-
-
-
+CREATE INDEX custName_index ON customer(lname, fname);
+CREATE INDEX city_index ON address(city);
+CREATE INDEX state_index ON state(code, name);
