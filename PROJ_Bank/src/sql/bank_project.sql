@@ -1,72 +1,88 @@
+DROP TABLE id_list IF EXISTS;
 
-DROP INDEX state_index;
-DROP INDEX city_index;
-DROP INDEX custName_index;
+DROP TABLE account_owner IF EXISTS;
 
-DROP TABLE customer_account;
-DROP TABLE account;
-DROP TABLE account_type;
-DROP TABLE customer;
-DROP TABLE address;
+DROP INDEX cusomter_last_name_index IF EXISTS;
+DROP INDEX cusomter_first_name_index IF EXISTS;
+DROP TABLE customer IF EXISTS;
+
+DROP TABLE account IF EXISTS;
+
+DROP TABLE account_type IF EXISTS;
+
+DROP INDEX address_city_index IF EXISTS;
+DROP TABLE address IF EXISTS;
+
 DROP TABLE state IF EXISTS;
-DROP TABLE id_list;
+
+CREATE TABLE state (
+    id INTEGER PRIMARY KEY,
+    code CHAR(2) NOT NULL UNIQUE,
+    name VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE address (
+    id INTEGER PRIMARY KEY,
+    street VARCHAR(255),
+    city VARCHAR(150) NOT NULL,
+    state_id INTEGER NOT NULL REFERENCES state(id),
+    zip CHAR(5) NOT NULL
+);
+
+CREATE INDEX address_city_index ON address(city);
+
+CREATE TABLE account_type (
+    id INTEGER PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
+    name VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE account (
+    id INTEGER PRIMARY KEY,
+    account_type INTEGER NOT NULL REFERENCES account_type(id),
+    account_number VARCHAR(30) NOT NULL UNIQUE,
+    balance NUMERIC(14, 2) NOT NULL
+);
+
+CREATE TABLE customer (
+    id INTEGER PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    mailing_address INTEGER REFERENCES address(id)
+);
+
+CREATE INDEX cusomter_first_name_index ON customer(first_name);
+CREATE INDEX cusomter_last_name_index ON customer(last_name);
+
+CREATE TABLE account_owner (
+    customer_id INTEGER NOT NULL REFERENCES customer(id),
+    account_id INTEGER NOT NULL REFERENCES account(id),
+    display_order INTEGER NOT NULL,
+    PRIMARY KEY (customer_id, account_id),
+    UNIQUE(account_id, display_order)
+);
 
 CREATE TABLE id_list (
     id INTEGER PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    lastID INTEGER NOT NULL,
-    UNIQUE (name)
+    last_id INTEGER NOT NULL
 );
 
-CREATE TABLE state (
-	id INTEGER PRIMARY KEY,
-	code VARCHAR(2) NOT NULL,
-	name VARCHAR(30) NOT NULL,
-	UNIQUE (code, name)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (1, 'id_list', 20);
 
-CREATE TABLE address (
-	id INTEGER PRIMARY KEY,
-	street VARCHAR(30) NOT NULL,
-	city VARCHAR(30),
-	stateID INTEGER NOT NULL,
-	zip VARCHAR(5),
-	FOREIGN KEY (stateID) REFERENCES state(id)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (10, 'address', 7000);
 
-CREATE TABLE customer (
-	id INTEGER PRIMARY KEY,
-	lname VARCHAR(30) NOT NULL,
-	fname VARCHAR(30),
-	addressID INTEGER NOT NULL,
-	FOREIGN KEY (addressID) REFERENCES address(id)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (11, 'customer', 8000);
 
-CREATE TABLE account_type (
-	id INTEGER PRIMARY KEY,
-	code VARCHAR(3) NOT NULL,
-	name VARCHAR(30) NOT NULL,
-	UNIQUE (code, name)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (12, 'account', 9000);
 
-CREATE TABLE account (
-	id INTEGER PRIMARY KEY,
-	typeID INTEGER NOT NULL,
-	account_number VARCHAR(30) NOT NULL UNIQUE,
-	balance NUMERIC(14,2) NOT NULL,
-	FOREIGN KEY (typeID) REFERENCES account_type(id)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (13, 'state', 4000);
 
-CREATE TABLE customer_account (
-	customerID INTEGER NOT NULL,
-	accountID INTEGER,
-	display_order INTEGER NOT NULL,
-	UNIQUE (accountID, display_order),
-	PRIMARY KEY (accountID, customerID),
-	FOREIGN KEY (customerID) REFERENCES customer (id),
-	FOREIGN KEY (accountID) REFERENCES account (id)
-);
+INSERT INTO id_list (id, name, last_id)
+VALUES (14, 'account_type', 2000);
 
-CREATE INDEX custName_index ON customer(lname, fname);
-CREATE INDEX city_index ON address(city);
---CREATE INDEX state_index ON state(code, name);

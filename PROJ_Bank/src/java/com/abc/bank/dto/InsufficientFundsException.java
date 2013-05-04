@@ -1,19 +1,23 @@
 package com.abc.bank.dto;
 
 public class InsufficientFundsException extends Exception {
+    public InsufficientFundsException(Account account) {
+        this("Insufficient funds available in account " + account.getId());
+    }
+    
     public InsufficientFundsException() {
         super();
     }
 
-    public InsufficientFundsException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    public InsufficientFundsException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public InsufficientFundsException(String arg0) {
-        super(arg0);
+    public InsufficientFundsException(String message) {
+        super(message);
     }
 
-    public InsufficientFundsException(Throwable arg0) {
-        super(arg0);
+    public InsufficientFundsException(Throwable cause) {
+        super(cause);
     }
 }

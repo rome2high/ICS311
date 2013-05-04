@@ -2,6 +2,8 @@ package com.abc.bank.dto;
 
 import java.io.*;
 
+import com.programix.util.*;
+
 public class Address implements Serializable {
     private String street;
     private String city;
@@ -41,5 +43,33 @@ public class Address implements Serializable {
 
     public void setZip(String zip) {
         this.zip = zip;
+    }
+    
+    public boolean equals(Object obj) {
+        if ( this == obj ) {
+            return true;
+        } else if ( obj == null || !getClass().equals(obj.getClass()) ) {
+            return false;
+        }
+
+        Address other = (Address) obj;
+        return ObjectTools.isSame(street, other.street) &&
+               ObjectTools.isSame(city, other.city) &&
+               ObjectTools.isSame(state, other.state) &&
+               ObjectTools.isSame(zip, other.zip);
+    }
+
+    public int hashCode() {
+        return street != null ? street.hashCode() : 0;
+    }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer(getClass().getName() + "[");
+        sb.append("street=" + street);
+        sb.append(", city=" + city);
+        sb.append(", state=" + state);
+        sb.append(", zip=" + zip);
+        sb.append("]");
+        return sb.toString();
     }
 }
