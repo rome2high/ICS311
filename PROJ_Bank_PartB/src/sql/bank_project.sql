@@ -86,3 +86,42 @@ VALUES (13, 'state', 4000);
 INSERT INTO id_list (id, name, last_id)
 VALUES (14, 'account_type', 2000);
 
+
+
+INSERT INTO state (id, code, name)
+VALUES (11, 'IW', 'Iowa');
+INSERT INTO state (id, code, name)
+VALUES (12, 'CA', 'California');
+INSERT INTO state (id, code, name)
+VALUES (13, 'TX', 'Texas');
+
+INSERT INTO account_type (id, code, name)
+VALUES (1, 'SAV', 'Saving');
+INSERT INTO account_type (id, code, name)
+VALUES (2, 'CHK', 'Checking');
+INSERT INTO account_type (id, code, name)
+VALUES (3, 'CD', 'Certificate Deposit');
+
+INSERT INTO address (id, street, city, state_id, zip)
+VALUES (1001, '54 South 9th St', 'Minneapolis', 11, '55402');
+INSERT INTO address (id, street, city, state_id, zip)
+VALUES (1002, '123 cali dr', 'Los Angles', 12, '55402');
+INSERT INTO address (id, street, city, state_id, zip)
+VALUES (1003, '234 savage dr', 'Savage', 11, '55402');
+
+INSERT INTO customer (id, last_name, first_name, mailing_address)
+VALUES (11, 'Doe', 'John', 1001);
+INSERT INTO customer (id, last_name, first_name, mailing_address)
+VALUES (12, 'Doe', 'Jane', 1001);
+insert into customer (id, last_name, first_name, mailing_address)
+values (13, 'Mai', 'Romeo', 1003);
+INSERT INTO customer (id, last_name, first_name, mailing_address)
+VALUES (14, 'Mai', 'vivian', 1002);
+INSERT INTO customer (id, last_name, first_name, mailing_address)
+VALUES (15, 'Mai', 'Ryan', 1002);
+insert into customer (id, last_name, first_name, mailing_address)
+values (16, 'Mai', 'Vivian', 1003);
+
+
+
+

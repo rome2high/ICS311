@@ -62,6 +62,30 @@ public class Demo {
             DASource daSource = createDaSource();
             BankDA bda = daSource.getDA(BankDA.class);
             loadStates(bda);
+            
+            Customer cReturn = new Customer();
+            //save customer
+            Customer c1 = new Customer();
+            Address a1 = new Address();
+//            CustomerId id1 = new CustomerId(200);//dont need customerId
+            a1.setStreet("1239 Brittany ct");
+            a1.setCity("Shakopee");
+            a1.setZip("55379");
+            a1.setState(bda.getSortedStates()[0]);
+            
+            c1.setFirstName("Vy");
+            c1.setLastName("Mai");
+            c1.setMailingAddress(a1);
+            
+            cReturn = bda.saveCustomer(c1);
+            System.out.println(cReturn);
+            
+            //get customer test code
+//            Customer c = new Customer();
+//            CustomerId id = new CustomerId(13);
+//            c = bda.getCustomer(id);
+//            System.out.println(c);
+            
         } catch ( DAException x ) {
             x.printStackTrace();
         }
